@@ -1,5 +1,5 @@
 import { gunzip, gzip, shouldCompress } from "../core/compress.ts";
-import { bytesEqual, utf8Decode, utf8Encode } from "../core/bytes.ts";
+import { ByteReader, ByteWriter, bytesEqual, utf8Decode, utf8Encode } from "../core/bytes.ts";
 import type {
   DecodeError,
   DecodeState,
@@ -33,6 +33,39 @@ function payloadBytes(payload: Payload): Uint8Array {
   return payload.kind === "text" ? utf8Encode(payload.text) : payload.bytes;
 }
 
+const SEALED_VERSION = 1;
+const SEALED_MIME = "application/octet-stream";
+
+interface Sealed {
+  readonly kind: Payload["kind"];
+  readonly name: string;
+  readonly mime: string;
+  readonly raw: Uint8Array;
+}
+
+function envelope(sealed: Sealed): Uint8Array {
+  return new ByteWriter()
+    .u8(sealed.kind === "text" ? 0 : 1)
+    .lenPrefixed(utf8Encode(sealed.name))
+    .lenPrefixed(utf8Encode(sealed.mime))
+    .bytes(sealed.raw)
+    .finish();
+}
+
+function openEnvelope(bytes: Uint8Array): Sealed {
+  const reader = new ByteReader(bytes);
+  const kind = reader.u8() === 0 ? "text" : "file";
+  const name = utf8Decode(reader.lenPrefixed());
+  const mime = utf8Decode(reader.lenPrefixed());
+  return { kind, name, mime, raw: reader.rest().slice() };
+}
+
+function toPayload(sealed: Sealed): Payload {
+  return sealed.kind === "text"
+    ? { kind: "text", text: utf8Decode(sealed.raw) }
+    : { kind: "file", name: sealed.name, mime: sealed.mime, bytes: sealed.raw };
+}
+
 function randomTransferId(): TransferId {
   return (randomBytes(4).reduce((acc, b) => (acc << 8) | b, 0) >>> 0) as TransferId;
 }
@@ -51,39 +84,57 @@ export class TransferSource {
     options: TransferOptions,
   ): Promise<TransferSource> {
     const raw = payloadBytes(payload);
-    const hash = await sha256(raw);
-
     const name = payload.kind === "file" ? payload.name : "";
     const mime =
       payload.kind === "file" ? payload.mime || "application/octet-stream" : "text/plain";
-
     const gzipWanted = await shouldCompress(raw, mime);
-    const compressed = gzipWanted ? await gzip(raw) : raw;
 
-    const encryptWanted = Boolean(options.passphrase);
-    let cargo: Uint8Array = compressed;
-    let salt: Uint8Array = new Uint8Array(0);
-    let iv: Uint8Array = new Uint8Array(0);
     if (options.passphrase) {
-      salt = randomBytes(SALT_BYTES);
-      iv = randomBytes(IV_BYTES);
+      const body = envelope({ kind: payload.kind, name, mime, raw });
+      const plain = new ByteWriter()
+        .u8(SEALED_VERSION)
+        .u8(gzipWanted ? 1 : 0)
+        .bytes(gzipWanted ? await gzip(body) : body)
+        .finish();
+      const salt = randomBytes(SALT_BYTES);
+      const iv = randomBytes(IV_BYTES);
       const key = await deriveKey(options.passphrase, salt);
-      cargo = await encrypt(key, iv, compressed);
+      const cargo = await encrypt(key, iv, plain);
+      return TransferSource.from(cargo, options.symbolSize, {
+        kind: "file",
+        name: "",
+        mime: SEALED_MIME,
+        flags: { gzip: false, encrypted: true },
+        sha256: await sha256(cargo),
+        salt,
+        iv,
+      });
     }
 
-    const encoder = new FountainEncoder(cargo, options.symbolSize);
-    const manifest: Manifest = {
-      transferId: randomTransferId(),
+    const cargo = gzipWanted ? await gzip(raw) : raw;
+    return TransferSource.from(cargo, options.symbolSize, {
       kind: payload.kind,
       name,
       mime,
+      flags: { gzip: gzipWanted, encrypted: false },
+      sha256: await sha256(raw),
+      salt: new Uint8Array(0),
+      iv: new Uint8Array(0),
+    });
+  }
+
+  private static from(
+    cargo: Uint8Array,
+    symbolSize: number,
+    fields: Pick<Manifest, "kind" | "name" | "mime" | "flags" | "sha256" | "salt" | "iv">,
+  ): TransferSource {
+    const encoder = new FountainEncoder(cargo, symbolSize);
+    const manifest: Manifest = {
+      ...fields,
+      transferId: randomTransferId(),
       cargoBytes: cargo.length,
-      symbolSize: options.symbolSize,
+      symbolSize,
       symbolCount: encoder.symbolCount,
-      flags: { gzip: gzipWanted, encrypted: encryptWanted },
-      sha256: hash,
-      salt,
-      iv,
     };
     return new TransferSource(manifest, encoder);
   }
@@ -166,37 +217,48 @@ export class TransferSink {
       return { ok: false, reason: "malformed-cargo" };
     }
     const m = this.manifest;
-    let cargo = this.decoder.assemble(m.cargoBytes);
+    const cargo = this.decoder.assemble(m.cargoBytes);
+    return m.flags.encrypted ? this.openSealed(m, cargo) : this.openPlain(m, cargo);
+  }
 
-    if (m.flags.encrypted) {
-      if (!this.passphrase) return { ok: false, reason: "passphrase-required" };
-      try {
-        const key = await deriveKey(this.passphrase, m.salt);
-        cargo = await decrypt(key, m.iv, cargo);
-      } catch {
-        return { ok: false, reason: "decrypt-failed" };
-      }
+  private async openSealed(m: Manifest, cargo: Uint8Array): Promise<AssembleResult> {
+    if (!bytesEqual(await sha256(cargo), m.sha256)) {
+      return { ok: false, reason: "integrity-mismatch" };
+    }
+    if (!this.passphrase) return { ok: false, reason: "passphrase-required" };
+
+    let plain: Uint8Array;
+    try {
+      const key = await deriveKey(this.passphrase, m.salt);
+      plain = await decrypt(key, m.iv, cargo);
+    } catch {
+      return { ok: false, reason: "decrypt-failed" };
     }
 
+    try {
+      const reader = new ByteReader(plain);
+      if (reader.u8() !== SEALED_VERSION) return { ok: false, reason: "malformed-cargo" };
+      const gzipped = reader.u8() === 1;
+      const rest = reader.rest();
+      const body = gzipped ? await gunzip(rest) : rest;
+      return { ok: true, payload: toPayload(openEnvelope(body)) };
+    } catch {
+      return { ok: false, reason: "decompress-failed" };
+    }
+  }
+
+  private async openPlain(m: Manifest, cargo: Uint8Array): Promise<AssembleResult> {
+    let raw = cargo;
     if (m.flags.gzip) {
       try {
-        cargo = await gunzip(cargo);
+        raw = await gunzip(cargo);
       } catch {
         return { ok: false, reason: "decompress-failed" };
       }
     }
-
-    const hash = await sha256(cargo);
-    if (!bytesEqual(hash, m.sha256)) {
+    if (!bytesEqual(await sha256(raw), m.sha256)) {
       return { ok: false, reason: "integrity-mismatch" };
     }
-
-    if (m.kind === "text") {
-      return { ok: true, payload: { kind: "text", text: utf8Decode(cargo) } };
-    }
-    return {
-      ok: true,
-      payload: { kind: "file", name: m.name, mime: m.mime, bytes: cargo },
-    };
+    return { ok: true, payload: toPayload({ kind: m.kind, name: m.name, mime: m.mime, raw }) };
   }
 }

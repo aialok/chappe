@@ -93,3 +93,37 @@ test("missing passphrase reports requirement", async () => {
   expect(result.ok).toBe(false);
   if (!result.ok) expect(result.reason).toBe("passphrase-required");
 });
+
+test("encrypted transfers reveal no name, type or plaintext fingerprint", async () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(5_000));
+  const source = await TransferSource.create(
+    { kind: "file", name: "protest-plan.pdf", mime: "application/pdf", bytes },
+    { symbolSize: 800, passphrase: "orbit-lemon-tiger" },
+  );
+  const m = source.manifest;
+  expect(m.name).toBe("");
+  expect(m.mime).toBe("application/octet-stream");
+  expect(m.kind).toBe("file");
+  expect(m.flags.gzip).toBe(false);
+  const plainHash = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+  expect(bytesEqual(m.sha256, plainHash)).toBe(false);
+
+  const { result } = await simulate(
+    { kind: "file", name: "protest-plan.pdf", mime: "application/pdf", bytes },
+    { passphrase: "orbit-lemon-tiger", dropRate: 0.2 },
+  );
+  expect(result.ok && result.payload.kind === "file" && result.payload.name).toBe(
+    "protest-plan.pdf",
+  );
+});
+
+test("encrypted text keeps its kind after unlocking", async () => {
+  const { result, manifest } = await simulate(
+    { kind: "text", text: "meet at the library" },
+    { passphrase: "quiet-harbor" },
+  );
+  expect(manifest.kind).toBe("file");
+  expect(result.ok && result.payload.kind === "text" && result.payload.text).toBe(
+    "meet at the library",
+  );
+});

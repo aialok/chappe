@@ -50,8 +50,9 @@ function ModuleProgress({ ratio }: { ratio: number }) {
 }
 
 function describe(manifest: Manifest): string {
+  if (manifest.flags.encrypted) return "Encrypted · name hidden until unlocked";
   const what = manifest.kind === "text" ? "Text" : manifest.name;
-  return `${what} · ${manifest.flags.encrypted ? "encrypted" : "not encrypted"}`;
+  return `${what} · not encrypted`;
 }
 
 export function Receive() {
@@ -218,8 +219,8 @@ export function Receive() {
         <div>
           <h2 className="heading">Enter the passphrase</h2>
           <p className="sub">
-            Everything arrived{incoming?.kind === "file" ? `, including ${incoming.name}` : ""}. It
-            stays locked until you enter the sender's passphrase.
+            Everything arrived. The contents and the file name stay locked until you enter the
+            sender's passphrase.
           </p>
         </div>
         <div className="field">
