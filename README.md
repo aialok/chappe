@@ -68,7 +68,7 @@ flowchart LR
     p -- yes --> e["AES-256-GCM"]
     p -- no --> fe
     e --> fe["Fountain encoder<br/>endless blocks"]
-    fe --> q["Staggered QR grid<br/>on screen"]
+    fe --> q["One QR code at a time<br/>on screen"]
   end
   subgraph receiver["Receiver · browser"]
     direction TB
@@ -101,14 +101,15 @@ sequenceDiagram
 - **Fountain code (LT, systematic).** The sender streams an endless set of
   blocks. The receiver rebuilds the file from any sufficient subset, in any
   order, so missed frames cost a little time and never stall the transfer.
-- **Staggered grid.** Up to nine codes on screen, changed one at a time, so the
-  camera rarely catches a half-drawn frame.
+- **One code at a time.** A single large QR code changes several times a
+  second, with a full quiet zone, so phone cameras lock on quickly.
 - **Two decoders.** The browser's `BarcodeDetector` where it exists (Chrome on
-  Android and macOS). Elsewhere, including iPhone, `jsQR` scans the whole frame
-  plus four overlapping corner tiles to read each code in a 2 × 2 grid.
+  Android and macOS), and `jsQR` everywhere else, including iPhone.
 - **No network, enforced.** A `connect-src 'none'` Content Security Policy in
-  the production build, plus a runtime guard that blocks and counts any request.
-  The count is shown in the header.
+  the production build, plus a runtime guard that refuses `fetch`, XHR,
+  WebSocket and beacons.
+- **Works offline.** A small service worker caches the app on the first visit,
+  so it opens with wifi off and can be installed to the home screen.
 
 ## Develop
 
@@ -130,8 +131,10 @@ from a phone during development, serve the dev server over https.
 static host with https works: Cloudflare Pages or Vercel with build command
 `bun run build` and output directory `dist`.
 
+Set your public address in `.env` (`VITE_SITE_URL`). The build uses it for the
+canonical URL, link previews, `robots.txt` and `sitemap.xml`.
+
 ## Limits
 
 - Files up to 5 MB. Larger files work in principle but take minutes to beam.
-- The 3 × 3 grid needs a receiver with `BarcodeDetector` (Chrome on Android).
 - Speed depends on the screen, the camera and the light. Start with the defaults.

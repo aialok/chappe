@@ -8,7 +8,14 @@ import "./styles.css";
 import { App } from "./App.tsx";
 import { installNetworkGuard } from "./trust/network-guard.ts";
 
-if (import.meta.env.PROD) installNetworkGuard();
+if (import.meta.env.PROD) {
+  installNetworkGuard();
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  }
+}
 
 const root = document.getElementById("root");
 if (!root) throw new Error("root element missing");

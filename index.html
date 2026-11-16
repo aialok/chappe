@@ -2,23 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Chappe · Offline file sharing over QR codes</title>
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0"
+      name="description"
+      content="Send files and text between two devices by scanning QR codes. No internet, no server, no upload. Optional passphrase encryption. Free and open source."
     />
+    <link rel="canonical" href="%VITE_SITE_URL%/" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0c0f" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Chappe" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Chappe" />
+    <meta property="og:title" content="Chappe · File transfer at the speed of sight" />
     <meta
-      name="description"
-      content="Share files and text between devices with QR codes. No internet, no servers, no upload. Your data never leaves the screen."
+      property="og:description"
+      content="Share files between devices with QR codes. No internet, no server, no upload. Free and open source."
     />
-    <title>Chappe</title>
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Chappe: file transfer at the speed of sight. Share files between devices with QR codes."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Chappe · File transfer at the speed of sight" />
+    <meta
+      name="twitter:description"
+      content="Share files between devices with QR codes. No internet, no server, no upload."
+    />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Chappe",
+        "url": "%VITE_SITE_URL%/",
+        "description": "Send files and text between two devices by scanning QR codes, with no internet, server or upload.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires a modern browser with a camera to receive.",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "aialok", "url": "https://github.com/aialok" },
+        "codeRepository": "https://github.com/aialok/chappe"
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main style="max-width: 640px; margin: 64px auto; padding: 0 20px; font-family: system-ui, sans-serif">
+        <h1>Chappe: file transfer at the speed of sight</h1>
+        <p>
+          Send files and text between two devices by scanning QR codes. One device shows a stream
+          of codes, the other reads them with its camera. No internet, no server, no upload.
+          Optional passphrase encryption with AES-256-GCM. Free and open source.
+        </p>
+        <noscript>Chappe runs in your browser and needs JavaScript turned on.</noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
