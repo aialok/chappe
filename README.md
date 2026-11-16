@@ -3,9 +3,34 @@
 Share files and text between two devices by pointing a camera at a screen.
 No internet, no server, no upload. The data moves as a stream of QR codes.
 
-Named after Claude Chappe, who built the optical telegraph in 1792: the first
-system to send messages across distance by sight. Chappe does the same with a
-screen and a camera.
+## What "Chappe" means
+
+Claude Chappe (1763–1805) was a French engineer who built the **optical
+telegraph**, first demonstrated in 1792. It was the first practical system for
+sending messages across long distances **by sight**.
+
+A line of towers stood on hilltops, each within telescope range of the next.
+Every tower had movable wooden arms. An operator set the arms to a position
+that stood for a symbol in a shared codebook. The operator at the next tower
+read it through a telescope and repeated it. News from the front reached Paris
+in hours instead of days, and the word *telegraph* ("far writer") was coined
+for this system.
+
+This app does the same thing 230 years later. The arms become QR codes, the
+telescope becomes a phone camera, and the codebook becomes a fountain code.
+Nothing travels over a wire or a network. The message moves as light.
+
+```mermaid
+flowchart LR
+  subgraph then["1792 · Chappe's optical telegraph"]
+    direction LR
+    t1["Tower<br/>arms set to a symbol"] -- "telescope" --> t2["Next tower<br/>reads and repeats"] -- "telescope" --> t3["Paris<br/>decodes with the codebook"]
+  end
+  subgraph now["Today · Chappe the app"]
+    direction LR
+    s1["Sender screen<br/>QR codes"] -- "camera" --> r1["Receiver phone<br/>decodes with the fountain code"]
+  end
+```
 
 ## Why
 
@@ -21,9 +46,45 @@ lens.
 
 ## How it works
 
+```mermaid
+flowchart LR
+  subgraph sender["Sender · browser"]
+    direction TB
+    f["File or text"] --> z{"Compresses well?"}
+    z -- yes --> g["gzip"]
+    z -- no --> p{"Passphrase set?"}
+    g --> p
+    p -- yes --> e["AES-256-GCM"]
+    p -- no --> fe
+    e --> fe["Fountain encoder<br/>endless blocks"]
+    fe --> q["Staggered QR grid<br/>on screen"]
+  end
+  subgraph receiver["Receiver · browser"]
+    direction TB
+    c["Camera"] --> d["Peeling decoder<br/>any blocks, any order"]
+    d --> x["Decrypt and unzip"]
+    x --> h{"SHA-256 matches?"}
+    h -- yes --> ok["Save the file"]
+    h -- no --> bad["Report it as damaged"]
+  end
+  q -. "light only, no network" .-> c
 ```
-file ─▶ gzip (if it helps) ─▶ AES-GCM (if passphrase) ─▶ fountain code ─▶ QR grid ─▶ screen
-save ◀─ SHA-256 check      ◀─ decrypt                 ◀─ peeling decode ◀─ camera  ◀─ QR grid
+
+The sender never waits for the receiver, and the receiver never talks back. It
+joins whenever it likes, misses frames freely, and finishes once it has caught
+enough blocks:
+
+```mermaid
+sequenceDiagram
+  participant S as Sender screen
+  participant R as Receiver camera
+  S-)R: manifest (name, size, salt), repeated every few codes
+  loop until the receiver has enough
+    S-)R: fountain block n
+    Note right of R: some frames are missed, the rest still count
+  end
+  R->>R: rebuild, decrypt, check SHA-256
+  Note over S,R: nothing is ever sent from the receiver back to the sender
 ```
 
 - **Fountain code (LT, systematic).** The sender streams an endless set of
