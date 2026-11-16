@@ -127,9 +127,6 @@ body {
     "intro"
     "tool"
     "steps"
-    "facts"
-    "offline"
-    "security"
     "faq";
 }
 
@@ -139,9 +136,6 @@ body {
     grid-template-areas:
       "intro tool"
       "steps tool"
-      "facts tool"
-      "offline tool"
-      "security tool"
       "faq tool";
     column-gap: 72px;
     row-gap: 40px;
@@ -172,41 +166,9 @@ body {
   max-width: 46ch;
 }
 
-.facts {
-  grid-area: facts;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 22px 32px;
-  margin: 0;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
-}
 
-.fact dt {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-.fact dt::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  background: var(--ink);
-}
 
-.fact dd {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 14px;
-}
 
 .tool {
   grid-area: tool;
@@ -896,8 +858,15 @@ body {
   content: "−";
 }
 
+.faq-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 10px;
+}
+
 .faq p {
-  margin: 10px 0 0;
+  margin: 0;
   color: var(--ink-2);
   font-size: 14.5px;
   max-width: 62ch;
@@ -1066,43 +1035,12 @@ body {
   }
 }
 
-.offline,
-.security {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
-.offline {
-  grid-area: offline;
-}
 
-.security {
-  grid-area: security;
-}
 
-.offline > .section-title,
-.security > .section-title {
-  margin-bottom: 0;
-}
 
-.offline p {
-  margin: 0;
-  color: var(--ink-2);
-  font-size: 14.5px;
-  max-width: 62ch;
-}
 
-.offline .btn {
-  align-self: flex-start;
-  width: auto;
-  text-decoration: none;
-}
 
-.offline .hint a,
-.security > a.hint {
-  color: var(--ink-2);
-}
 
 code {
   font-family: var(--font-mono);
@@ -1119,7 +1057,7 @@ code {
   gap: 20px;
 }
 
-.security h3 {
+.security-lists h3 {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
@@ -1128,7 +1066,7 @@ code {
   margin: 0 0 10px;
 }
 
-.security ul {
+.security-lists ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1136,14 +1074,14 @@ code {
   gap: 9px;
 }
 
-.security li {
+.security-lists li {
   position: relative;
   padding-left: 22px;
   color: var(--ink-2);
   font-size: 14px;
 }
 
-.security li::before {
+.security-lists li::before {
   position: absolute;
   left: 0;
   top: 0;
@@ -1151,12 +1089,22 @@ code {
   font-weight: 500;
 }
 
-.security .is-yes li::before {
+.security-lists .is-yes li::before {
   content: "+";
   color: var(--ok);
 }
 
-.security .is-no li::before {
+.security-lists .is-no li::before {
   content: "−";
   color: var(--bad);
+}
+
+.text-link {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+
+.foot-links {
+  display: flex;
+  gap: 16px;
 }

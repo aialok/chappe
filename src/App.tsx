@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { FinderMark, GitHubIcon, StarIcon } from "./app/components/icons.tsx";
 import { Receive } from "./app/Receive.tsx";
 import { Send } from "./app/Send.tsx";
@@ -9,6 +9,8 @@ const REPO_URL = "https://github.com/aialok/chappe";
 const AUTHOR_URL = "https://github.com/aialok";
 const RELEASE_URL = `${REPO_URL}/releases/latest`;
 const OFFLINE_FILE_URL = `${REPO_URL}/releases/latest/download/chappe.html`;
+const SECURITY_URL = `${REPO_URL}/blob/main/SECURITY.md`;
+const IS_OFFLINE_COPY = location.protocol === "file:";
 
 const STEPS = [
   {
@@ -22,25 +24,6 @@ const STEPS = [
   {
     title: "On the other device, tap Receive",
     body: "Point the camera at the screen. The file arrives and is checked automatically.",
-  },
-];
-
-const FACTS = [
-  {
-    title: "No network",
-    body: "The page blocks every outgoing request, so the file can only leave through the screen.",
-  },
-  {
-    title: "Encrypted",
-    body: "With a passphrase, the file is sealed with AES-256-GCM before the first code is drawn.",
-  },
-  {
-    title: "Loss-tolerant",
-    body: "Fountain codes rebuild the file from whatever codes the camera catches, in any order.",
-  },
-  {
-    title: "Up to 5 MB",
-    body: "Text, links, PDFs, images. Small files finish in seconds, bigger ones in a minute or two.",
   },
 ];
 
@@ -59,28 +42,95 @@ const DOES_NOT_PROTECT = [
   "Chappe has not had an independent security audit yet.",
 ];
 
-const IS_OFFLINE_COPY = location.protocol === "file:";
+function OfflineAnswer() {
+  if (IS_OFFLINE_COPY) {
+    return (
+      <p>
+        You are running the offline copy, so this page needs no internet at all. To pass it on,
+        share this same file over Bluetooth, a USB stick or a memory card.
+      </p>
+    );
+  }
+  return (
+    <>
+      <p>
+        Yes. Once the page has loaded, transfers work with wifi off. On a phone, use Install app or
+        Add to Home Screen and it opens offline too. On a computer, you can also download Chappe as
+        a single file and pass it on over Bluetooth, a USB stick or a memory card.
+      </p>
+      <p>
+        <a className="text-link" href={OFFLINE_FILE_URL}>
+          Download chappe.html
+        </a>
+        . Check that its SHA-256 matches the one on the{" "}
+        <a className="text-link" href={RELEASE_URL} target="_blank" rel="noreferrer">
+          release page
+        </a>{" "}
+        with <code>shasum -a 256 chappe.html</code>.
+      </p>
+    </>
+  );
+}
 
-const FAQ = [
+function SecurityAnswer() {
+  return (
+    <>
+      <div className="security-lists">
+        <div>
+          <h3>Protects</h3>
+          <ul className="is-yes">
+            {PROTECTS.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3>Does not protect</h3>
+          <ul className="is-no">
+            {DOES_NOT_PROTECT.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <p>
+        <a className="text-link" href={SECURITY_URL} target="_blank" rel="noreferrer">
+          Read the full threat model
+        </a>
+      </p>
+    </>
+  );
+}
+
+const FAQ: { q: string; a: ReactNode }[] = [
   {
     q: "Is my file uploaded anywhere?",
-    a: "No. Chappe has no server. The file is encoded in your browser, shown as QR codes, and decoded by the other device's camera. The page refuses all network requests while it runs.",
+    a: (
+      <p>
+        No. Chappe has no server. The file is encoded in your browser, shown as QR codes, and
+        decoded by the other device's camera. The page refuses all network requests while it runs.
+      </p>
+    ),
   },
-  {
-    q: "Does it work without internet?",
-    a: "Yes. Once the page has loaded, you can turn wifi off and transfers still work. Install it from your browser menu and it opens offline too.",
-  },
-  {
-    q: "Is it safe for sensitive files?",
-    a: "Set a passphrase and share it in person. The contents and the file name are then encrypted with AES-256-GCM, so anyone who films the screen without the passphrase gets nothing readable. Without one, anyone who can see the screen could record the codes.",
-  },
+  { q: "Does it work without internet?", a: <OfflineAnswer /> },
+  { q: "What does Chappe protect, and what doesn't it?", a: <SecurityAnswer /> },
   {
     q: "Which devices does it work on?",
-    a: "Any recent browser with a camera: Chrome, Safari, Edge or Firefox, on iPhone, Android, Mac, Windows or Linux. The receiving device needs camera permission.",
+    a: (
+      <p>
+        Any recent browser with a camera: Chrome, Safari, Edge or Firefox, on iPhone, Android, Mac,
+        Windows or Linux. Files up to 5 MB.
+      </p>
+    ),
   },
   {
     q: "Why is it called Chappe?",
-    a: "After Claude Chappe, who built the optical telegraph in 1792: towers that passed messages along by sight. Chappe does the same with a screen and a camera.",
+    a: (
+      <p>
+        After Claude Chappe, who built the optical telegraph in 1792: towers that passed messages
+        along by sight. Chappe does the same with a screen and a camera.
+      </p>
+    ),
   },
 ];
 
@@ -116,7 +166,7 @@ export function App() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="logo" href="/" aria-label="Chappe home">
+        <a className="logo" href={IS_OFFLINE_COPY ? "#app" : "/"} aria-label="Chappe home">
           <FinderMark />
           Chappe
         </a>
@@ -169,78 +219,6 @@ export function App() {
           </ol>
         </section>
 
-        <dl className="facts">
-          {FACTS.map((fact) => (
-            <div className="fact" key={fact.title}>
-              <dt>{fact.title}</dt>
-              <dd>{fact.body}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <section className="offline" aria-labelledby="offline-title">
-          <h2 id="offline-title" className="section-title">
-            Take Chappe offline
-          </h2>
-          {IS_OFFLINE_COPY ? (
-            <p>
-              You are running the offline copy. To pass it on, share this same file over Bluetooth,
-              a USB stick or a memory card.
-            </p>
-          ) : (
-            <>
-              <p>
-                Download Chappe as a single file. Open it in a browser with no internet at all, or
-                pass it to someone over Bluetooth, a USB stick or a memory card. Works best on
-                computers. On phones, use Install app or Add to Home Screen instead.
-              </p>
-              <a className="btn btn-wide" href={OFFLINE_FILE_URL}>
-                Download chappe.html
-              </a>
-            </>
-          )}
-          <p className="hint">
-            Check that your copy is genuine. Its SHA-256 fingerprint must match the one on the{" "}
-            <a href={RELEASE_URL} target="_blank" rel="noreferrer">
-              GitHub release page
-            </a>
-            . Run <code>shasum -a 256 chappe.html</code> on Mac or Linux, or{" "}
-            <code>certutil -hashfile chappe.html SHA256</code> on Windows.
-          </p>
-        </section>
-
-        <section className="security" aria-labelledby="security-title">
-          <h2 id="security-title" className="section-title">
-            What Chappe protects, and what it doesn't
-          </h2>
-          <div className="security-lists">
-            <div>
-              <h3>Protects</h3>
-              <ul className="is-yes">
-                {PROTECTS.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3>Does not protect</h3>
-              <ul className="is-no">
-                {DOES_NOT_PROTECT.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <a
-            className="hint"
-            href={`${REPO_URL}/blob/main/SECURITY.md`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Read the full threat model
-          </a>
-        </section>
-
         <section className="faq" aria-labelledby="faq-title">
           <h2 id="faq-title" className="section-title">
             Questions
@@ -248,7 +226,7 @@ export function App() {
           {FAQ.map((item) => (
             <details key={item.q}>
               <summary>{item.q}</summary>
-              <p>{item.a}</p>
+              <div className="faq-answer">{item.a}</div>
             </details>
           ))}
         </section>
@@ -261,9 +239,17 @@ export function App() {
             aialok
           </a>
         </span>
-        <a href={REPO_URL} target="_blank" rel="noreferrer">
-          Open source on GitHub
-        </a>
+        <span className="foot-links">
+          <a href={SECURITY_URL} target="_blank" rel="noreferrer">
+            Security
+          </a>
+          <a href={`${REPO_URL}/blob/main/LICENSE`} target="_blank" rel="noreferrer">
+            MIT license
+          </a>
+          <a href={REPO_URL} target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+        </span>
       </footer>
     </div>
   );
