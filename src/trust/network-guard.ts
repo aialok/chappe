@@ -1,20 +1,9 @@
-let attempts = 0;
+const MESSAGE = "chappe: network access is disabled";
+
 let installed = false;
-const listeners = new Set<(count: number) => void>();
 
-function bump(): void {
-  attempts += 1;
-  for (const listener of listeners) listener(attempts);
-}
-
-export function onNetworkAttempt(cb: (count: number) => void): () => void {
-  listeners.add(cb);
-  cb(attempts);
-  return () => listeners.delete(cb);
-}
-
-export function networkAttempts(): number {
-  return attempts;
+function refuse(): never {
+  throw new Error(MESSAGE);
 }
 
 export function installNetworkGuard(): void {
@@ -22,30 +11,18 @@ export function installNetworkGuard(): void {
   installed = true;
 
   try {
-    window.fetch = () => {
-      bump();
-      return Promise.reject(new Error("chappe: network access is disabled"));
-    };
+    window.fetch = () => Promise.reject(new Error(MESSAGE));
   } catch {}
 
   try {
-    XMLHttpRequest.prototype.open = function () {
-      bump();
-      throw new Error("chappe: network access is disabled");
-    } as typeof XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = refuse as typeof XMLHttpRequest.prototype.open;
   } catch {}
 
   try {
-    window.WebSocket = function () {
-      bump();
-      throw new Error("chappe: network access is disabled");
-    } as unknown as typeof WebSocket;
+    window.WebSocket = refuse as unknown as typeof WebSocket;
   } catch {}
 
   try {
-    navigator.sendBeacon = () => {
-      bump();
-      return false;
-    };
+    navigator.sendBeacon = () => false;
   } catch {}
 }
