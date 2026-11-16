@@ -24,21 +24,21 @@ export function installNetworkGuard(): void {
   try {
     window.fetch = () => {
       bump();
-      return Promise.reject(new Error("scandrop: network access is disabled"));
+      return Promise.reject(new Error("chappe: network access is disabled"));
     };
   } catch {}
 
   try {
     XMLHttpRequest.prototype.open = function () {
       bump();
-      throw new Error("scandrop: network access is disabled");
+      throw new Error("chappe: network access is disabled");
     } as typeof XMLHttpRequest.prototype.open;
   } catch {}
 
   try {
     window.WebSocket = function () {
       bump();
-      throw new Error("scandrop: network access is disabled");
+      throw new Error("chappe: network access is disabled");
     } as unknown as typeof WebSocket;
   } catch {}
 

@@ -96,7 +96,7 @@ export function Send({ onFocusChange }: SendProps) {
     if (phase !== "compose") return;
     setError("");
     if (!window.isSecureContext || !crypto.subtle) {
-      setError("ScanDrop needs https (or localhost) to run. Open the https address instead.");
+      setError("Chappe needs https (or localhost) to run. Open the https address instead.");
       return;
     }
 
@@ -160,7 +160,7 @@ export function Send({ onFocusChange }: SendProps) {
           <span>{passphrase ? "Encrypted" : "Not encrypted"}</span>
         </div>
         <p className="beam-hint">
-          On the other device, open ScanDrop, tap Receive and fit all the codes
+          On the other device, open Chappe, tap Receive and fit all the codes
           inside the frame. Keep this screen bright and still.
         </p>
         <div className="beam-actions">

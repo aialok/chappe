@@ -1,12 +1,15 @@
-# ScanDrop
+# Chappe
 
 Share files and text between two devices by pointing a camera at a screen.
-No internet, no server, no upload. The data moves as a stream of QR codes:
-one device shows them, the other scans them, and the file drops out.
+No internet, no server, no upload. The data moves as a stream of QR codes.
+
+Named after Claude Chappe, who built the optical telegraph in 1792: the first
+system to send messages across distance by sight. Chappe does the same with a
+screen and a camera.
 
 ## Why
 
-Cloud sharing hands your file to a third party. ScanDrop never does. The file is
+Cloud sharing hands your file to a third party. Chappe never does. The file is
 encoded in your browser and read back by the other device's camera. It works
 with wifi off, so you can check for yourself that the data went nowhere but the
 lens.

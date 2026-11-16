@@ -5,7 +5,7 @@ export function downloadFile(name: string, mime: string, bytes: Uint8Array): voi
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = name || "scandrop-file";
+  anchor.download = name || "chappe-file";
   anchor.style.display = "none";
   document.body.append(anchor);
   anchor.click();
@@ -18,7 +18,7 @@ export function canShareFiles(): boolean {
 }
 
 export async function shareFile(name: string, mime: string, bytes: Uint8Array): Promise<boolean> {
-  const file = new File([bytes as unknown as BlobPart], name || "scandrop-file", {
+  const file = new File([bytes as unknown as BlobPart], name || "chappe-file", {
     type: mime || "application/octet-stream",
   });
   if (!navigator.canShare?.({ files: [file] })) return false;

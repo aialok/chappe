@@ -15,7 +15,7 @@ const CSP = [
 
 function cspPlugin(): Plugin {
   return {
-    name: "scandrop-csp",
+    name: "chappe-csp",
     apply: "build",
     transformIndexHtml(html) {
       return html.replace(

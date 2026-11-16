@@ -39,10 +39,10 @@ async function simulate(payload: Payload, opts: SimOptions = {}) {
 }
 
 test("text round trip", async () => {
-  const { result } = await simulate({ kind: "text", text: "hello scandrop" });
+  const { result } = await simulate({ kind: "text", text: "hello chappe" });
   expect(result.ok).toBe(true);
   if (result.ok && result.payload.kind === "text") {
-    expect(result.payload.text).toBe("hello scandrop");
+    expect(result.payload.text).toBe("hello chappe");
   }
 });
 
