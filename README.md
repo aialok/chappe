@@ -5,12 +5,13 @@
 <h1 align="center">Chappe</h1>
 
 <p align="center">
-  <b>Open-source file sharing over QR codes. Fully offline, end-to-end encrypted.</b>
+  <b>Open-source, fully offline file sharing over QR codes.</b>
 </p>
 
 <p align="center">
   Show a stream of QR codes on one screen, scan it with another device, and the
-  file arrives. No internet, no server, no upload.
+  file arrives. No internet, no server, no upload. Add a passphrase and it is
+  encrypted too.
 </p>
 
 ## What "Chappe" means
