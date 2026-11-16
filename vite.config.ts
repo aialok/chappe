@@ -15,7 +15,7 @@ const CSP = [
 
 function cspPlugin(): Plugin {
   return {
-    name: "soliton-csp",
+    name: "scandrop-csp",
     apply: "build",
     transformIndexHtml(html) {
       return html.replace(

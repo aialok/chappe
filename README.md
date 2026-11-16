@@ -1,15 +1,12 @@
-# Soliton
+# ScanDrop
 
 Share files and text between two devices by pointing a camera at a screen.
-No internet, no server, no upload. The data moves as a stream of QR codes.
-
-The name comes from the Robust Soliton distribution at the core of the
-fountain code in `src/transport/soliton.ts`, and from the physics term for a
-wave that keeps its shape while it travels.
+No internet, no server, no upload. The data moves as a stream of QR codes:
+one device shows them, the other scans them, and the file drops out.
 
 ## Why
 
-Cloud sharing hands your file to a third party. Soliton never does. The file is
+Cloud sharing hands your file to a third party. ScanDrop never does. The file is
 encoded in your browser and read back by the other device's camera. It works
 with wifi off, so you can check for yourself that the data went nowhere but the
 lens.

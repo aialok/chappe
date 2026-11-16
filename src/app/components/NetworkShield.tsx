@@ -9,7 +9,7 @@ export function NetworkShield() {
   return (
     <span
       className={`status${blocked ? " is-bad" : ""}`}
-      title="Soliton blocks every network request. Your data only leaves through the screen."
+      title="ScanDrop blocks every network request. Your data only leaves through the screen."
     >
       <span className="status-dot" />
       {blocked ? `${count} request${count > 1 ? "s" : ""} blocked` : "Offline · 0 requests"}

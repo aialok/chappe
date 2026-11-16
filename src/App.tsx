@@ -34,7 +34,7 @@ export function App() {
       <header className="topbar">
         <span className="logo">
           <FinderMark />
-          Soliton
+          ScanDrop
         </span>
         <NetworkShield />
       </header>
@@ -44,7 +44,7 @@ export function App() {
           <section className="intro">
             <h1>Share files by pointing a camera.</h1>
             <p>
-              Soliton turns a file into a stream of QR codes. The other device
+              ScanDrop turns a file into a stream of QR codes. The other device
               reads them with its camera. Nothing touches the internet.
             </p>
           </section>
