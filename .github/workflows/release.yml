@@ -1,0 +1,37 @@
+name: Release offline file
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+
+      - run: bun install --frozen-lockfile
+      - run: bun test
+      - run: bun run build:single
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          HASH=$(cut -d' ' -f1 dist/chappe.html.sha256)
+          gh release create "$GITHUB_REF_NAME" dist/chappe.html dist/chappe.html.sha256 \
+            --title "Chappe $GITHUB_REF_NAME" \
+            --notes "Single-file offline build of Chappe. Open chappe.html in a browser with no internet.
+
+          SHA-256 of chappe.html:
+
+          \`$HASH\`
+
+          Check your copy with \`shasum -a 256 chappe.html\` (Mac, Linux) or \`certutil -hashfile chappe.html SHA256\` (Windows). If the fingerprint does not match exactly, do not use the file."

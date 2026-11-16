@@ -108,6 +108,19 @@ self.addEventListener("fetch", (event) => {
 }
 
 export default defineConfig(({ mode }) => {
+  if (mode === "single") {
+    return {
+      plugins: [react()],
+      publicDir: false,
+      build: {
+        outDir: "dist-single",
+        emptyOutDir: true,
+        assetsInlineLimit: 100_000_000,
+        cssCodeSplit: false,
+        modulePreload: false,
+      },
+    };
+  }
   const env = loadEnv(mode, process.cwd(), "VITE_");
   const siteUrl = (env.VITE_SITE_URL ?? "").replace(/\/$/, "");
   return {

@@ -10,7 +10,7 @@ import { installNetworkGuard } from "./trust/network-guard.ts";
 
 if (import.meta.env.PROD) {
   installNetworkGuard();
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     });

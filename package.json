@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:single": "tsc -b && bun scripts/build-single.ts",
     "lint": "oxlint",
     "test": "bun test",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
