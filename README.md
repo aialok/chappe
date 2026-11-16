@@ -157,6 +157,10 @@ Read [SECURITY.md](SECURITY.md) for the threat model: what Chappe protects,
 what an observer can still learn, and how to check that your copy is genuine.
 Chappe has not had an independent security audit yet.
 
+## License
+
+[MIT](LICENSE) © 2026 Alok Gupta
+
 ## Limits
 
 - Files up to 5 MB. Larger files work in principle but take minutes to beam.
