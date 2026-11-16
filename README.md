@@ -1,7 +1,17 @@
-# Chappe
+<p align="center">
+  <img src="public/favicon.svg" width="72" height="72" alt="Chappe logo" />
+</p>
 
-Share files and text between two devices by pointing a camera at a screen.
-No internet, no server, no upload. The data moves as a stream of QR codes.
+<h1 align="center">Chappe</h1>
+
+<p align="center">
+  <b>Open-source file sharing over QR codes. Fully offline, end-to-end encrypted.</b>
+</p>
+
+<p align="center">
+  Show a stream of QR codes on one screen, scan it with another device, and the
+  file arrives. No internet, no server, no upload.
+</p>
 
 ## What "Chappe" means
 
