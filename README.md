@@ -51,7 +51,8 @@ with wifi off, so you can check for yourself that the data went nowhere but the
 lens.
 
 - No upload, no account, no server.
-- Optional passphrase: AES-256-GCM (PBKDF2, 210k iterations) before the first code is drawn.
+- Optional passphrase: AES-256-GCM (PBKDF2, 210k iterations) before the first
+  code is drawn. The file name and type are encrypted too.
 - SHA-256 check on arrival, so a damaged transfer is reported instead of saved.
 - Nothing to install on the sending machine. It is a web page.
 
@@ -120,6 +121,7 @@ bun test           # transport, crypto, codec and end-to-end QR tests
 bun run typecheck
 bun run lint
 bun run build      # static site in dist/
+bun run build:single  # dist/chappe.html, the single-file offline copy
 ```
 
 The camera and Web Crypto need a secure context: `localhost` or https. To test
@@ -133,6 +135,27 @@ static host with https works: Cloudflare Pages or Vercel with build command
 
 Set your public address in `.env` (`VITE_SITE_URL`). The build uses it for the
 canonical URL, link previews, `robots.txt` and `sitemap.xml`.
+
+## Offline file
+
+Each [release](https://github.com/aialok/chappe/releases/latest) includes
+`chappe.html`: the whole app in one file, with no network needed at all. Open
+it in a browser, or pass it on over Bluetooth, a USB stick or a memory card.
+The release notes list its SHA-256 fingerprint so anyone can check their copy.
+
+To publish a release, push a version tag. A GitHub Action runs the tests,
+builds the file and attaches it with its fingerprint:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+## Security
+
+Read [SECURITY.md](SECURITY.md) for the threat model: what Chappe protects,
+what an observer can still learn, and how to check that your copy is genuine.
+Chappe has not had an independent security audit yet.
 
 ## Limits
 

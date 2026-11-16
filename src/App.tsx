@@ -7,6 +7,8 @@ type Tab = "send" | "receive";
 
 const REPO_URL = "https://github.com/aialok/chappe";
 const AUTHOR_URL = "https://github.com/aialok";
+const RELEASE_URL = `${REPO_URL}/releases/latest`;
+const OFFLINE_FILE_URL = `${REPO_URL}/releases/latest/download/chappe.html`;
 
 const STEPS = [
   {
@@ -42,6 +44,23 @@ const FACTS = [
   },
 ];
 
+const PROTECTS = [
+  "Your file never goes to a server. The page refuses network requests while it runs.",
+  "With a passphrase, the contents and the file name are encrypted with AES-256-GCM.",
+  "Damaged or altered transfers are detected and refused.",
+  "Nothing is stored. No accounts, no history, no analytics.",
+];
+
+const DOES_NOT_PROTECT = [
+  "Anyone who can see the screen can record the codes. Without a passphrase, they can read them.",
+  "People nearby can see that a transfer is happening.",
+  "A phone that is taken and unlocked gives up any files saved on it.",
+  "A weak passphrase can be guessed from a recording. Use four or more random words.",
+  "Chappe has not had an independent security audit yet.",
+];
+
+const IS_OFFLINE_COPY = location.protocol === "file:";
+
 const FAQ = [
   {
     q: "Is my file uploaded anywhere?",
@@ -53,7 +72,7 @@ const FAQ = [
   },
   {
     q: "Is it safe for sensitive files?",
-    a: "Set a passphrase. The file is then encrypted with AES-256-GCM, so anyone who films the screen without the passphrase gets nothing readable. Without one, anyone who can see the screen could record the codes.",
+    a: "Set a passphrase and share it in person. The contents and the file name are then encrypted with AES-256-GCM, so anyone who films the screen without the passphrase gets nothing readable. Without one, anyone who can see the screen could record the codes.",
   },
   {
     q: "Which devices does it work on?",
@@ -158,6 +177,69 @@ export function App() {
             </div>
           ))}
         </dl>
+
+        <section className="offline" aria-labelledby="offline-title">
+          <h2 id="offline-title" className="section-title">
+            Take Chappe offline
+          </h2>
+          {IS_OFFLINE_COPY ? (
+            <p>
+              You are running the offline copy. To pass it on, share this same file over Bluetooth,
+              a USB stick or a memory card.
+            </p>
+          ) : (
+            <>
+              <p>
+                Download Chappe as a single file. Open it in a browser with no internet at all, or
+                pass it to someone over Bluetooth, a USB stick or a memory card. Works best on
+                computers. On phones, use Install app or Add to Home Screen instead.
+              </p>
+              <a className="btn btn-wide" href={OFFLINE_FILE_URL}>
+                Download chappe.html
+              </a>
+            </>
+          )}
+          <p className="hint">
+            Check that your copy is genuine. Its SHA-256 fingerprint must match the one on the{" "}
+            <a href={RELEASE_URL} target="_blank" rel="noreferrer">
+              GitHub release page
+            </a>
+            . Run <code>shasum -a 256 chappe.html</code> on Mac or Linux, or{" "}
+            <code>certutil -hashfile chappe.html SHA256</code> on Windows.
+          </p>
+        </section>
+
+        <section className="security" aria-labelledby="security-title">
+          <h2 id="security-title" className="section-title">
+            What Chappe protects, and what it doesn't
+          </h2>
+          <div className="security-lists">
+            <div>
+              <h3>Protects</h3>
+              <ul className="is-yes">
+                {PROTECTS.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Does not protect</h3>
+              <ul className="is-no">
+                {DOES_NOT_PROTECT.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <a
+            className="hint"
+            href={`${REPO_URL}/blob/main/SECURITY.md`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Read the full threat model
+          </a>
+        </section>
 
         <section className="faq" aria-labelledby="faq-title">
           <h2 id="faq-title" className="section-title">
