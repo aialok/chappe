@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { FinderMark, GitHubIcon, StarIcon } from "./app/components/icons.tsx";
 import { Receive } from "./app/Receive.tsx";
 import { Send } from "./app/Send.tsx";
@@ -251,6 +252,7 @@ export function App() {
           </a>
         </span>
       </footer>
+      <Analytics />
     </div>
   );
 }
